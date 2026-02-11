@@ -1,5 +1,3 @@
-
-
 const FEW_SHOT_TEMPLATES = [
   {
     name: "Sentiment + Sarcasm + Intent Detection",
@@ -33,12 +31,13 @@ Intent: Praise
 ---
 Now analyze this input:
 ""Love how fast the UI loads. Too bad every API call feels like it’s taking a coffee break."
-Output:`,
+Output:`
   },
   {
     name: "SQL Generator",
     description: "Converts natural language to SQL based on schema.",
-    system: "Convert user input into a valid SQL query based on app schema: Users(id, name, email, signup_date).",
+    system:
+      "Convert user input into a valid SQL query based on app schema: Users(id, name, email, signup_date).",
     prompt: `Input: Show me all users
 Output: SELECT * FROM Users;
 ---
@@ -46,8 +45,8 @@ Input: Count the users
 Output: SELECT COUNT(*) FROM Users;
 ---
 Input: Find the email of the user named 'Alice'
-Output:`,
-  },
+Output:`
+  }
 ];
 
 export default FEW_SHOT_TEMPLATES;

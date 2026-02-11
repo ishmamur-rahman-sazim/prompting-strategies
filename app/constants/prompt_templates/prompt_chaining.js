@@ -6,8 +6,8 @@ const PROMPT_CHAINING_TEMPLATES = [
     system:
       "You are a support assistant that must ground answers in provided documentation only.",
     prompt: [
-// Step 1 — Retrieval (works with your KB search)
-`You are a documentation retriever.
+      // Step 1 — Retrieval (works with your KB search)
+      `You are a documentation retriever.
 Given the user query below, return the TOP 3 most relevant paragraphs from the Knowledge Base.
 Return ONLY a JSON array of 3 strings (each string is one paragraph). No extra text.
 
@@ -20,26 +20,27 @@ Knowledge Base (paragraphs):
 [Paragraph D] "If you see 401 errors, verify authentication tokens and session expiration policies."
 [Paragraph E] "When using a gateway, mismatched protocol versions between gateway and upstream can trigger 505-like failures."`,
 
-// Step 2 — Answer ONLY from retrieved paragraphs (faithfulness)
-`Using ONLY the paragraphs in Output 1, answer the user's question.
+      // Step 2 — Answer ONLY from retrieved paragraphs (faithfulness)
+      `Using ONLY the paragraphs in Output 1, answer the user's question.
 If the paragraphs do not contain enough information, reply exactly: "I don't know".
 Keep the answer under 5 sentences.
 
-Output 1:`,
-    ],
+Output 1:`
+    ]
   },
   {
     name: "Billing Routing (Translate → Service)",
-    description: "Translate query (if needed) → choose the correct service for the request.",
+    description:
+      "Translate query (if needed) → choose the correct service for the request.",
     system: "You are a routing assistant. Follow the output rules exactly.",
     prompt: [
-// Step 1 — Translate to English (Zero-shot)
-`Translate the following user query to English. Output ONLY the English translation.
+      // Step 1 — Translate to English (Zero-shot)
+      `Translate the following user query to English. Output ONLY the English translation.
 User query (Bangla):
 "আমার গত তিন মাসের বিলগুলো ডাউনলোড করতে চাই, বিশেষ করে যেগুলো এখনো পেইড হয়নি।"`,
 
-// Step 2 — Choose service (Few-shot)
-`Choose exactly ONE service from the list below that can fulfill the request.
+      // Step 2 — Choose service (Few-shot)
+      `Choose exactly ONE service from the list below that can fulfill the request.
 Return ONLY the service name (no extra text).
 AVAILABLE_SERVICES = [BillingService, AnalyticsService, SupportService]
 
@@ -59,16 +60,18 @@ User (English): "How do I fix Error 505?"
 Output: SupportService
 ---
 Now route this user request (English):
-`,
-    ],
+`
+    ]
   },
   {
     name: "Open-Ended Spending QA (Final Output JSON)",
-    description: "Parse data → compute summaries → answer any question → wrap final result as JSON.",
-    system: "You are a practical finance assistant. Use only provided data. Follow output rules exactly.",
+    description:
+      "Parse data → compute summaries → answer any question → wrap final result as JSON.",
+    system:
+      "You are a practical finance assistant. Use only provided data. Follow output rules exactly.",
     prompt: [
-// Step 1 — Parse raw data
-`You will receive personal finance data (income + expenses by category).
+      // Step 1
+      `You will receive personal finance data (income + expenses by category).
 Convert it into structured JSON.
 Output ONLY valid JSON in this schema:
 
@@ -114,8 +117,8 @@ Other: 130
 """
 `,
 
-// Step 2 — Compute reusable summaries
-`Using ONLY the INPUT CONTEXT (Output of Step 1), compute summaries and output ONLY valid JSON:
+      // Step 2
+      `Using ONLY the INPUT CONTEXT (Output of Step 1), compute summaries and output ONLY valid JSON:
 
 {
 "monthly_summary": [
@@ -144,15 +147,15 @@ Rules:
 - category_totals_all_months sums each category across all months
 - category_trend_latest_vs_previous compares latest month to previous month; delta = latest - previous`,
 
-// Step 3 — Open-ended answer (text only)
-`Answer the USER_QUESTION using ONLY the INPUT CONTEXT (Output of Step 2).
+      // Step 3
+      `Answer the USER_QUESTION using ONLY the INPUT CONTEXT (Output of Step 2).
 If the question cannot be answered from the data, say: "I don't know based on the provided data."
 Keep the answer short (max 5 sentences). Output TEXT ONLY.
 USER_QUESTION:
 "<<PUT QUESTION HERE>>"`,
 
-// Step 4 — FINAL OUTPUT WRAPPER (this becomes currentContext)
-`You are now producing the FINAL OUTPUT of the chain.
+      // Step 4
+      `You are now producing the FINAL OUTPUT of the chain.
 Using ONLY the INPUT CONTEXT (Output of Step 3), output ONLY valid JSON in this schema:
 
 {
@@ -173,9 +176,9 @@ Rules:
 - Set answer = the exact answer text from the input context.
 - decision_guidance.needed = true ONLY if the user question asks for advice, a plan, optimization, budgeting, or achieving a savings goal.
 - If needed=false, set decision=""; why=[]; actions=[].
-- If needed=true, actions must be realistic and based on typical variable categories (shopping, entertainment, other, food). Keep impacts plausible (e.g., do not exceed the current category spend for latest month).`,
-    ],
-  },
+- If needed=true, actions must be realistic and based on typical variable categories (shopping, entertainment, other, food). Keep impacts plausible (e.g., do not exceed the current category spend for latest month).`
+    ]
+  }
 ];
 
 export default PROMPT_CHAINING_TEMPLATES;

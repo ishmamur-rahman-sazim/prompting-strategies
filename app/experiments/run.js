@@ -3,14 +3,18 @@ import chalk from "chalk";
 import ora from "ora";
 
 import { PreviewSelect } from "../utils/index.js";
-import { runZeroShot, runFewShot, runPromptChaining } from "../strategies/index.js";
+import {
+  runPromptChaining,
+  runPrompt,
+  runReflexion
+} from "../strategies/index.js";
 import { MENU_OPTIONS, BACK_OPTION } from "../constants/menu_options.js";
-import { 
-printFinalResponse, 
-printChainExecutionLog, 
-getTemplatesForStrategy,
-chooseStrategy, 
-} from "../utils/helpers.js"
+import {
+  printFinalResponse,
+  printChainExecutionLog,
+  getTemplatesForStrategy,
+  chooseStrategy
+} from "../utils/helpers.js";
 
 const { Select } = pkg;
 
@@ -21,13 +25,15 @@ const chooseTemplate = async (templates) => {
     name: "templateName",
     message: "Select a prompt example (Arrow keys to preview):",
     choices: navigationTemplates.map((t) => t.name),
-    templates: navigationTemplates,
+    templates: navigationTemplates
   });
 
   const selectedName = await selector.run();
   if (selectedName === BACK_OPTION.name) return { goBack: true };
 
-  const selectedTemplate = navigationTemplates.find((t) => t.name === selectedName);
+  const selectedTemplate = navigationTemplates.find(
+    (t) => t.name === selectedName
+  );
   return { goBack: false, selectedTemplate };
 };
 
@@ -35,17 +41,26 @@ const runExperiment = async (selectedStrategy, selectedTemplate, spinner) => {
   const startTime = Date.now();
   let result;
 
-  if (selectedStrategy === MENU_OPTIONS.ZERO_SHOT) {
-    result = await runZeroShot(selectedTemplate.prompt);
-  } else if (selectedStrategy === MENU_OPTIONS.FEW_SHOT) {
-    result = await runFewShot(selectedTemplate);
-  } else if (selectedStrategy === MENU_OPTIONS.PROMPT_CHAINING) {
+  if (!Object.values(MENU_OPTIONS).includes(selectedStrategy)) {
+    throw new Error(`Unknown strategy: ${selectedStrategy}`);
+  }
+
+  if (selectedStrategy === MENU_OPTIONS.PROMPT_CHAINING) {
     const onStepStart = (stepName, current, total) => {
-      spinner.text = chalk.yellow(`Running Chain ${stepName} (${current}/${total})...`);
+      spinner.text = chalk.yellow(
+        `Running Chain ${stepName} (${current}/${total})...`
+      );
     };
     result = await runPromptChaining(selectedTemplate, onStepStart);
+  } else if (selectedStrategy === MENU_OPTIONS.REFLEXION) {
+    const onStepStart = (stepName, current, total) => {
+      spinner.text = chalk.yellow(
+        `Reflexion Loop: ${stepName} (${current}/${total})...`
+      );
+    };
+    result = await runReflexion(selectedTemplate, onStepStart);
   } else {
-    throw new Error(`Unknown strategy: ${selectedStrategy}`);
+    result = await runPrompt(selectedTemplate);
   }
 
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -56,7 +71,7 @@ const askRunAgain = async () => {
   const again = new Select({
     name: "again",
     message: "Run another experiment?",
-    choices: ["Yes", "No"],
+    choices: ["Yes", "No"]
   });
 
   const choice = await again.run();
@@ -78,11 +93,15 @@ const main = async () => {
 
   const spinner = ora({
     text: chalk.yellow(`Running ${selectedTemplate.name}...`),
-    color: "cyan",
+    color: "cyan"
   }).start();
 
   try {
-    const { result, duration } = await runExperiment(selectedStrategy, selectedTemplate, spinner);
+    const { result, duration } = await runExperiment(
+      selectedStrategy,
+      selectedTemplate,
+      spinner
+    );
     spinner.succeed(chalk.green(`Completed in ${duration}s`));
 
     if (selectedStrategy === MENU_OPTIONS.PROMPT_CHAINING) {

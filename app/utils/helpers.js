@@ -11,13 +11,14 @@ export const printFinalResponse = (result) => {
 
   console.log("\n" + chalk.dim("--------------------------------------"));
   console.log(
-    chalk.dim(`Tokens: ${result.metrics.inputTokens} in / ${result.metrics.outputTokens} out`)
+    chalk.dim(
+      `Tokens: ${result.metrics.inputTokens} in / ${result.metrics.outputTokens} out`
+    )
   );
   console.log(chalk.dim(`Speed:  ${result.metrics.tps} tokens/sec`));
   console.log(chalk.dim("--------------------------------------\n"));
 };
 
-/** UTIL-CANDIDATE (non-async): pure printing helper, can move to utils */
 export const printChainExecutionLog = (history) => {
   console.log("\n" + chalk.bgMagenta.black.bold(" ⛓️  CHAIN EXECUTION LOG "));
   history.forEach((step) => {
@@ -32,8 +33,8 @@ export const printChainExecutionLog = (history) => {
   console.log(chalk.dim("\n⬇️ Passing final output to user ⬇️"));
 };
 
-/** UTIL-CANDIDATE (non-async): pure mapping helper, can move to utils */
-export const getTemplatesForStrategy = (strategy) => STRATEGY_TEMPLATES[strategy] ?? [];
+export const getTemplatesForStrategy = (strategy) =>
+  STRATEGY_TEMPLATES[strategy] ?? [];
 
 export const chooseStrategy = async () => {
   console.clear();
@@ -42,7 +43,7 @@ export const chooseStrategy = async () => {
   const prompt = new Select({
     name: "strategy",
     message: "Choose a Prompting Method",
-    choices: Object.values(MENU_OPTIONS),
+    choices: Object.values(MENU_OPTIONS)
   });
 
   return prompt.run();
